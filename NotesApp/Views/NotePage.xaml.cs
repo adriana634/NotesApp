@@ -28,7 +28,7 @@ public partial class NotePage : ContentPage
 		if (BindingContext is Note note)
 		{
             // Save the file.
-            File.WriteAllText(note.FilePath, TextEditor.Text);
+            File.WriteAllText(note.Filename, TextEditor.Text);
         }
 
         await Shell.Current.GoToAsync("..");
@@ -39,9 +39,9 @@ public partial class NotePage : ContentPage
 		if (BindingContext is Note note)
 		{
             // Delete the file.
-            if (File.Exists(note.FilePath))
+            if (File.Exists(note.Filename))
             {
-                File.Delete(note.FilePath);
+                File.Delete(note.Filename);
             }
         }
 
@@ -52,7 +52,7 @@ public partial class NotePage : ContentPage
     {
         Note note = new()
         {
-            FilePath = filePath
+            Filename = filePath
         };
 
         if (File.Exists(filePath))

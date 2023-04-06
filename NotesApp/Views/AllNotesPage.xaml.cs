@@ -29,7 +29,7 @@ public partial class AllNotesPage : ContentPage
             var note = (Note)e.CurrentSelection[0];
 
             // Should navigate to "NotePage?ItemId=path\on\device\XYZ.notes.txt"
-            await Shell.Current.GoToAsync($"{nameof(NotePage)}?{nameof(NotePage.ItemId)}={note.FilePath}");
+            await Shell.Current.GoToAsync($"{nameof(NotePage)}?{nameof(NotePage.ItemId)}={note.Filename}");
 
             // Unselect the UI
             notesCollection.SelectedItem = null;
