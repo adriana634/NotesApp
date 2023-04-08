@@ -44,10 +44,11 @@ namespace NotesApp.ViewModels
                 if (matchedNote != null)
                 {
                     matchedNote.Reload();
+                    this.AllNotes.Move(this.AllNotes.IndexOf(matchedNote), 0);
                 }
                 else
                 {
-                    this.AllNotes.Add(new NoteViewModel(Models.Note.Load(noteId)));
+                    this.AllNotes.Insert(0, new NoteViewModel(Models.Note.Load(noteId)));
                 }
             }
             else if (query.ContainsKey("deleted"))
