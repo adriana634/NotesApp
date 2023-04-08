@@ -15,17 +15,17 @@
 
         public void Save()
         {
-            File.WriteAllText(System.IO.Path.Combine(FileSystem.AppDataDirectory, Filename), Text);
+            File.WriteAllText(Path.Combine(FileSystem.AppDataDirectory, Filename), Text);
         }
 
         public void Delete()
         {
-            File.Delete(System.IO.Path.Combine(FileSystem.AppDataDirectory, Filename));
+            File.Delete(Path.Combine(FileSystem.AppDataDirectory, Filename));
         }
 
         public static Note Load(string filename)
         {
-            string filePath = System.IO.Path.Combine(FileSystem.AppDataDirectory, filename);
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, filename);
 
             if (File.Exists(filePath) == false)
             {
@@ -36,7 +36,7 @@
                 new Note()
                 {
                     Filename = Path.GetFileName(filePath),
-                    Text = File.ReadAllText(filename),
+                    Text = File.ReadAllText(filePath),
                     Date = File.GetLastWriteTime(filePath)
                 };
         }
