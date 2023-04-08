@@ -71,4 +71,12 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EditorConfigFiles Remove="D:\Dev\CSharp\NotesApp\NotesApp\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="D:\Dev\CSharp\NotesApp\NotesApp\.editorconfig" />
+	</ItemGroup>
+
 </Project>

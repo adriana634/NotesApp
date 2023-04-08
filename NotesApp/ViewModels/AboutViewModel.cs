@@ -13,12 +13,12 @@ namespace NotesApp.ViewModels
 
         public AboutViewModel()
         {
-            ShowMoreInfoCommand = new AsyncRelayCommand(ShowMoreInfo);
+            this.ShowMoreInfoCommand = new AsyncRelayCommand(this.ShowMoreInfo);
         }
 
-        async Task ShowMoreInfo()
+        private async Task ShowMoreInfo()
         {
-            await Launcher.Default.OpenAsync(MoreInfoUrl);
+            await Launcher.Default.OpenAsync(this.MoreInfoUrl);
         }
     }
 }
