@@ -6,9 +6,10 @@ namespace NotesApp.ViewModels
 {
     public class NoteViewModel : ObservableObject, IQueryAttributable
     {
+        private bool _isNewNote;
         private Models.Note _note;
 
-        public string Identifier => this._note.Filename;
+        public int Identifier => this._note.Id;
 
         public DateTime Date => this._note.Date;
 
@@ -31,6 +32,7 @@ namespace NotesApp.ViewModels
 
         public NoteViewModel()
         {
+            this._isNewNote = true;
             this._note = new Models.Note();
             this.SaveCommand = new AsyncRelayCommand(this.Save);
             this.DeleteCommand = new AsyncRelayCommand(this.Delete);
@@ -38,6 +40,7 @@ namespace NotesApp.ViewModels
 
         public NoteViewModel(Models.Note note)
         {
+            this._isNewNote = false;
             this._note = note;
             this.SaveCommand = new AsyncRelayCommand(this.Save);
             this.DeleteCommand = new AsyncRelayCommand(this.Delete);
@@ -46,29 +49,40 @@ namespace NotesApp.ViewModels
         private async Task Save()
         {
             this._note.Date = DateTime.Now;
-            this._note.Save();
-            await Shell.Current.GoToAsync($"..?saved={this._note.Filename}");
+
+            if (this._isNewNote == true)
+            {
+                App.NoteRepository.AddNote(this._note);
+            }
+            else
+            {
+                App.NoteRepository.UpdateNote(this._note);
+            }
+            
+            await Shell.Current.GoToAsync($"..?saved={this._note.Id}");
         }
 
         private async Task Delete()
         {
-            this._note.Delete();
-            await Shell.Current.GoToAsync($"..?deleted={this._note.Filename}");
+            App.NoteRepository.DeleteNote(this._note);
+            await Shell.Current.GoToAsync($"..?deleted={this._note.Id}");
         }
 
         void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("load"))
             {
-                var filename = query["load"].ToString();
-                this._note = Models.Note.Load(filename);
+                this._isNewNote = false;
+
+                var noteId = int.Parse(query["load"].ToString());
+                this._note = App.NoteRepository.GetNoteById(noteId);
                 this.RefreshProperties();
             }
         }
 
         public void Reload()
         {
-            this._note = Models.Note.Load(this._note.Filename);
+            this._note = App.NoteRepository.GetNoteById(this._note.Id);
             this.RefreshProperties();
         }
 

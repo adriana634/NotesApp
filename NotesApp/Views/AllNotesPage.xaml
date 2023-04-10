@@ -4,7 +4,8 @@
              xmlns:viewModels="clr-namespace:NotesApp.ViewModels"
              x:Class="NotesApp.Views.AllNotesPage"
              Title="Your Notes"
-             NavigatedTo="ContentPage_NavigatedTo">
+             NavigatedTo="ContentPage_NavigatedTo"
+             Appearing="ContentPage_Appearing">
     <ContentPage.BindingContext>
         <viewModels:NotesViewModel />
     </ContentPage.BindingContext>
