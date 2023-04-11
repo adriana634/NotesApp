@@ -14,11 +14,11 @@ public partial class AllNotesPage : ContentPage
 		this.notesCollection.SelectedItem = null;
     }
 
-    private void ContentPage_Appearing(object sender, EventArgs e)
+    private async void ContentPage_Appearing(object sender, EventArgs e)
     {
         if (this.BindingContext is NotesViewModel notesViewModel)
         {
-            notesViewModel.LoadNotes();
+            await notesViewModel.LoadNotes();
         }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using NotesApp.Messages;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModels
 {
-    public class NotesViewModel : IQueryAttributable
+    public class NotesViewModel
     {
         private bool _isDataLoaded;
+        private Dictionary<int, Models.Note> _loadedNotes;
 
         public ObservableCollection<NoteViewModel> AllNotes { get; }
         public ICommand NewCommand { get; }
@@ -15,23 +18,29 @@ namespace NotesApp.ViewModels
         public NotesViewModel()
         {
             this.AllNotes = new ObservableCollection<NoteViewModel>();
-            this.NewCommand = new AsyncRelayCommand(NewNoteAsync);
-            this.SelectNoteCommand = new AsyncRelayCommand<NoteViewModel>(SelectNoteAsync);
+            this.NewCommand = new AsyncRelayCommand(this.NewNoteAsync);
+            this.SelectNoteCommand = new AsyncRelayCommand<NoteViewModel>(this.SelectNoteAsync);
+
+            WeakReferenceMessenger.Default.Register<NoteCreatedMessage>(this, OnNoteCreated);
+            WeakReferenceMessenger.Default.Register<NoteSavedMessage>(this, OnNoteSaved);
+            WeakReferenceMessenger.Default.Register<NoteDeletedMessage>(this, OnNoteDeleted);
         }
 
-        public void LoadNotes()
+        public async Task LoadNotes()
         {
             if (this._isDataLoaded == true)
                 return;
 
             this._isDataLoaded = true;
 
-            var notes = App.NoteRepository.GetAllNotes()
-                                          .Select(note => new NoteViewModel(note));
+            var notes = await App.NoteRepository.GetAllNotesAsync();
+
+            this._loadedNotes = new Dictionary<int, Models.Note>(notes.Count);
 
             foreach (var note in notes)
             {
-                this.AllNotes.Add(note);
+                this.AllNotes.Add(new NoteViewModel(note));
+                this._loadedNotes.Add(note.Id, note);
             }
         }
 
@@ -44,36 +53,44 @@ namespace NotesApp.ViewModels
         {
             if (note != null)
             {
-                await Shell.Current.GoToAsync($"{nameof(Views.NotePage)}?load={note.Identifier}");
+                var noteModel = this._loadedNotes[note.Identifier];
+
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "Note", noteModel }
+                };
+                await Shell.Current.GoToAsync($"{nameof(Views.NotePage)}", navigationParameter);
             }
         }
 
-        void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
+        private void OnNoteCreated(object recipient, NoteCreatedMessage message)
         {
-            if (query.ContainsKey("saved"))
-            {
-                var noteId = int.Parse(query["saved"].ToString());
-                var matchedNote = this.AllNotes.Where(note => note.Identifier == noteId).FirstOrDefault();
+            Models.Note newNote = message.Value;
+            this.AllNotes.Insert(0, new NoteViewModel(newNote));
+        }
 
-                // If note is found, update it
-                if (matchedNote != null)
-                {
-                    matchedNote.Reload();
-                    this.AllNotes.Move(this.AllNotes.IndexOf(matchedNote), 0);
-                }
-                else
-                {
-                    var dbNote = App.NoteRepository.GetNoteById(noteId);
-                    this.AllNotes.Insert(0, new NoteViewModel(dbNote));
-                }
+        private void OnNoteSaved(object recipient, NoteSavedMessage message)
+        {
+            Models.Note updatedNote = message.Value;
+            NoteViewModel matchedNote = this.AllNotes.Where(note => note.Identifier == updatedNote.Id).FirstOrDefault();
+
+            // If note is found, update it
+            if (matchedNote != null)
+            {
+                this.AllNotes.Move(this.AllNotes.IndexOf(matchedNote), 0);
+                matchedNote.Refresh();
             }
-            else if (query.ContainsKey("deleted"))
-            {
-                var noteId = int.Parse(query["deleted"].ToString());
-                var matchedNote = this.AllNotes.Where(note => note.Identifier == noteId).FirstOrDefault();
+        }
 
-                // If note is found, update it
-                this.AllNotes?.Remove(matchedNote);
+        private void OnNoteDeleted(object recipient, NoteDeletedMessage message)
+        {
+            int deletedNoteId = message.Value;
+            NoteViewModel matchedNote = this.AllNotes.Where(note => note.Identifier == deletedNoteId).FirstOrDefault();
+
+            // If note is found, update it
+            if (matchedNote != null)
+            {
+                this.AllNotes.Remove(matchedNote);
             }
         }
     }

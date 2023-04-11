@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using NotesApp.Messages;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModels
@@ -52,41 +54,44 @@ namespace NotesApp.ViewModels
 
             if (this._isNewNote == true)
             {
-                App.NoteRepository.AddNote(this._note);
+                await App.NoteRepository.AddNoteAsync(this._note);
+
+                var newNote = await App.NoteRepository.GetNoteByIdAsync(this._note.Id);
+                WeakReferenceMessenger.Default.Send(new NoteCreatedMessage(newNote));
             }
             else
             {
-                App.NoteRepository.UpdateNote(this._note);
+                await App.NoteRepository.UpdateNoteAsync(this._note);
+
+                var updatedNote = await App.NoteRepository.GetNoteByIdAsync(this._note.Id);
+                WeakReferenceMessenger.Default.Send(new NoteSavedMessage(updatedNote));
             }
-            
-            await Shell.Current.GoToAsync($"..?saved={this._note.Id}");
+
+            await Shell.Current.GoToAsync("..");
         }
 
         private async Task Delete()
         {
-            App.NoteRepository.DeleteNote(this._note);
-            await Shell.Current.GoToAsync($"..?deleted={this._note.Id}");
+            await App.NoteRepository.DeleteNoteAsync(this._note);
+
+            WeakReferenceMessenger.Default.Send(new NoteDeletedMessage(this._note.Id));
+
+            await Shell.Current.GoToAsync("..");
         }
 
-        void IQueryAttributable.ApplyQueryAttributes(IDictionary<string, object> query)
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.ContainsKey("load"))
+            if (query.ContainsKey("Note"))
             {
                 this._isNewNote = false;
 
-                var noteId = int.Parse(query["load"].ToString());
-                this._note = App.NoteRepository.GetNoteById(noteId);
-                this.RefreshProperties();
+                var noteModel = query["Note"] as Models.Note;
+                this._note = noteModel;
+                this.Refresh();
             }
         }
 
-        public void Reload()
-        {
-            this._note = App.NoteRepository.GetNoteById(this._note.Id);
-            this.RefreshProperties();
-        }
-
-        private void RefreshProperties()
+        public void Refresh()
         {
             this.OnPropertyChanged(nameof(this.Text));
             this.OnPropertyChanged(nameof(this.Date));

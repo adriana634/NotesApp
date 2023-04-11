@@ -7,55 +7,56 @@ namespace NotesApp.Repositories
     {
         private readonly string _dbPath;
 
-        private SQLiteConnection _connection;
+        private SQLiteAsyncConnection _connection;
 
         public NoteRepository(string dbPath)
         {
             this._dbPath = dbPath;
         }
 
-        private void Init()
+        private async Task InitAsync()
         {
             if (this._connection != null)
                 return;
 
-            this._connection = new SQLiteConnection(this._dbPath);
-            this._connection.CreateTable<Note>();
+            this._connection = new SQLiteAsyncConnection(this._dbPath);
+
+            await this._connection.CreateTableAsync<Note>();
         }
 
-        public List<Note> GetAllNotes()
+        public async Task<List<Note>> GetAllNotesAsync()
         {
-            this.Init();
+            await this.InitAsync();
 
-            return this._connection.Table<Note>().ToList();
+            return await this._connection.Table<Note>().ToListAsync();
         }
 
-        public Note GetNoteById(int id)
+        public async Task<Note> GetNoteByIdAsync(int id)
         {
-            this.Init();
+            await this.InitAsync();
 
-            return this._connection.Get<Note>(id);
+            return await this._connection.GetAsync<Note>(id);
         }
 
-        public void AddNote(Note note)
+        public async Task AddNoteAsync(Note note)
         {
-            this.Init();
+            await this.InitAsync();
 
-            this._connection.Insert(note);
+            await this._connection.InsertAsync(note);
         }
 
-        public void UpdateNote(Note note)
+        public async Task UpdateNoteAsync(Note note)
         {
-            this.Init();
+            await this.InitAsync();
 
-            this._connection.Update(note);
+            await this._connection.UpdateAsync(note);
         }
 
-        public void DeleteNote(Note note)
+        public async Task DeleteNoteAsync(Note note)
         {
-            this.Init();
+            await this.InitAsync();
 
-            this._connection.Delete(note);
+            await this._connection.DeleteAsync(note);
         }
     }
 }
