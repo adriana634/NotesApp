@@ -1,17 +1,11 @@
-﻿using NotesApp.Repositories;
-
-namespace NotesApp;
+﻿namespace NotesApp;
 
 public partial class App : Application
 {
-	public static NoteRepository NoteRepository { get; set; }
-
-	public App(NoteRepository noteRepository)
+	public App()
 	{
 		InitializeComponent();
 
 		MainPage = new AppShell();
-
-		App.NoteRepository = noteRepository;
 	}
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net7.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
@@ -51,13 +51,19 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
+		<PackageReference Include="CSharpFunctionalExtensions" Version="2.38.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Update="Views\AllNotesPage.xaml.cs">
 	    <DependentUpon>AllNotesPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\NewNotePage.xaml.cs">
+	    <DependentUpon>NewNotePage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\UpdateNotePage.xaml.cs">
+	    <DependentUpon>UpdateNotePage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
@@ -68,17 +74,18 @@
 	  <MauiXaml Update="Views\AllNotesPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\NotePage.xaml">
+	  <MauiXaml Update="Views\NewNotePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\UpdateNotePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EditorConfigFiles Remove="D:\Dev\CSharp\NotesApp\NotesApp\.editorconfig" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="D:\Dev\CSharp\NotesApp\NotesApp\.editorconfig" />
+	  <ProjectReference Include="..\NotesApp.Navigation\NotesApp.Navigation.csproj" />
+	  <ProjectReference Include="..\NotesApp.Persistence\NotesApp.Persistence.csproj" />
+	  <ProjectReference Include="..\NotesApp.ViewModels\NotesApp.ViewModels.csproj" />
 	</ItemGroup>
 
 </Project>
