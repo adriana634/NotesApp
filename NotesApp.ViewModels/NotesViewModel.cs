@@ -130,6 +130,7 @@ namespace NotesApp.ViewModels
 
             Note newNote = message.Value;
             this.AllNotes.Insert(0, new NoteViewModel(newNote));
+            this._loadedNotes.Add(newNote.Id, newNote);
         }
 
         private void OnNoteUpdated(object recipient, NoteUpdatedMessage message)
