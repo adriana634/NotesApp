@@ -1,4 +1,5 @@
 ﻿using SQLite;
+using System.Diagnostics;
 
 namespace NotesApp.DatabaseContext
 {
@@ -8,6 +9,7 @@ namespace NotesApp.DatabaseContext
 
         public DbContext(string dbPath)
         {
+            Debug.Assert(string.IsNullOrEmpty(dbPath) == false);
             this._lazyConnection = new Lazy<SQLiteAsyncConnection>(() => new SQLiteAsyncConnection(dbPath));
         }
 

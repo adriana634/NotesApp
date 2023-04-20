@@ -8,6 +8,7 @@ using NotesApp.Repositories;
 using NotesApp.Services;
 using NotesApp.ViewModels.Interfaces;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModels
@@ -38,7 +39,7 @@ namespace NotesApp.ViewModels
 
             this.AllNotes = new ObservableCollection<NoteViewModel>();
             this.NewCommand = new AsyncRelayCommand(this.NewNoteAsync);
-            this.SelectNoteCommand = new AsyncRelayCommand<NoteViewModel>(this.SelectNoteAsync);
+            this.SelectNoteCommand = new AsyncRelayCommand<NoteViewModel>(this.SelectNoteAsync, this.CanExecuteSelectNote);
         }
 
         public void OnAppearing()
@@ -93,25 +94,49 @@ namespace NotesApp.ViewModels
             await this._navigationService.NavigateToAsync(Routes.NewNotePage);
         }
 
+        private bool CanExecuteSelectNote(NoteViewModel? note)
+        {
+            if (note == null)
+            {
+                return false;
+            }
+
+            var containsKey = this._loadedNotes.ContainsKey(note.Identifier);
+            if (containsKey == false)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private async Task SelectNoteAsync(NoteViewModel? note)
         {
-            if (note != null)
-            {
-                var noteModel = this._loadedNotes[note.Identifier];
+            Debug.Assert(note != null);
 
-                this._noteSelectionService.SelectedNote = noteModel;
-                await this._navigationService.NavigateToAsync(Routes.UpdateNotePage);
-            }
+            var containsKey = this._loadedNotes.ContainsKey(note.Identifier);
+            Debug.Assert(containsKey);
+
+            var noteModel = this._loadedNotes[note.Identifier];
+
+            this._noteSelectionService.SelectedNote = noteModel;
+            await this._navigationService.NavigateToAsync(Routes.UpdateNotePage);
         }
 
         private void OnNoteCreated(object recipient, NoteCreatedMessage message)
         {
+            Debug.Assert(message != null);
+            Debug.Assert(message.Value != null);
+
             Note newNote = message.Value;
             this.AllNotes.Insert(0, new NoteViewModel(newNote));
         }
 
         private void OnNoteUpdated(object recipient, NoteUpdatedMessage message)
         {
+            Debug.Assert(message != null);
+            Debug.Assert(message.Value != null);
+
             Note updatedNote = message.Value;
             NoteViewModel? matchedNote = this.AllNotes.Where(note => note.Identifier == updatedNote.Id).FirstOrDefault();
 
@@ -125,6 +150,8 @@ namespace NotesApp.ViewModels
 
         private void OnNoteDeleted(object recipient, NoteDeletedMessage message)
         {
+            Debug.Assert(message != null);
+
             int deletedNoteId = message.Value;
             NoteViewModel? matchedNote = this.AllNotes.Where(note => note.Identifier == deletedNoteId).FirstOrDefault();
 

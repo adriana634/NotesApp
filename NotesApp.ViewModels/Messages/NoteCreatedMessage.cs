@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 using NotesApp.Models;
+using System.Diagnostics;
 
 namespace NotesApp.Messages
 {
@@ -7,6 +8,7 @@ namespace NotesApp.Messages
     {
         public NoteCreatedMessage(Note note) : base(note)
         {
+            Debug.Assert(note != null);
         }
     }
 }

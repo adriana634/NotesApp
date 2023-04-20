@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NotesApp.Models;
+using System.Diagnostics;
 
 namespace NotesApp.ViewModels
 {
@@ -13,6 +14,8 @@ namespace NotesApp.ViewModels
 
         public NoteViewModel(Note note)
         {
+            Debug.Assert(note != null);
+
             this._note = note;
         }
 

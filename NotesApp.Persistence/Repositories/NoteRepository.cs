@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using NotesApp.DatabaseContext;
 using NotesApp.Models;
 using SQLite;
+using System.Diagnostics;
 
 namespace NotesApp.Repositories
 {
@@ -51,6 +52,8 @@ namespace NotesApp.Repositories
 
         public async Task<Result> AddNoteAsync(Note note)
         {
+            Debug.Assert(note != null);
+
             try
             {
                 var connection = await this._dbContext.GetConnection<Note>();
@@ -68,6 +71,8 @@ namespace NotesApp.Repositories
 
         public async Task<Result> UpdateNoteAsync(Note note)
         {
+            Debug.Assert(note != null);
+
             try
             {
                 var connection = await this._dbContext.GetConnection<Note>();
@@ -93,6 +98,8 @@ namespace NotesApp.Repositories
 
         public async Task<Result> DeleteNoteAsync(Note note)
         {
+            Debug.Assert(note != null);
+
             try
             {
                 var connection = await this._dbContext.GetConnection<Note>();

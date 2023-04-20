@@ -6,6 +6,7 @@ using NotesApp.Messages;
 using NotesApp.Models;
 using NotesApp.Repositories;
 using NotesApp.Services;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModels
@@ -35,6 +36,8 @@ namespace NotesApp.ViewModels
 
         public UpdateNoteViewModel(Note note, INoteRepository noteRepository, INavigationService navigationService)
         {
+            Debug.Assert(note != null);
+
             this._note = note;
             this._noteRepository = noteRepository;
             this._navigationService = navigationService;
