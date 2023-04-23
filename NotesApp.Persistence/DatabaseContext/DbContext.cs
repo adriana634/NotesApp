@@ -13,7 +13,7 @@ namespace NotesApp.DatabaseContext
             this._lazyConnection = new Lazy<SQLiteAsyncConnection>(() => new SQLiteAsyncConnection(dbPath));
         }
 
-        public async Task<SQLiteAsyncConnection> GetConnection<T>() where T : new()
+        public async Task<SQLiteAsyncConnection> GetAsyncConnection<T>() where T : new()
         {
             var connection = this._lazyConnection.Value;
 

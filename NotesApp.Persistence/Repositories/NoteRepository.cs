@@ -22,7 +22,7 @@ namespace NotesApp.Repositories
         {
             try
             {
-                var connection = await this._dbContext.GetConnection<Note>();
+                var connection = await this._dbContext.GetAsyncConnection<Note>();
 
                 var notes = await connection.Table<Note>().ToListAsync();
                 return Result.Success<List<Note>>(notes);
@@ -38,7 +38,7 @@ namespace NotesApp.Repositories
         {
             try
             {
-                var connection = await this._dbContext.GetConnection<Note>();
+                var connection = await this._dbContext.GetAsyncConnection<Note>();
 
                 var note = await connection.GetAsync<Note>(id);
                 return Result.Success<Note>(note);
@@ -56,7 +56,7 @@ namespace NotesApp.Repositories
 
             try
             {
-                var connection = await this._dbContext.GetConnection<Note>();
+                var connection = await this._dbContext.GetAsyncConnection<Note>();
 
                 await connection.InsertAsync(note);
 
@@ -75,7 +75,7 @@ namespace NotesApp.Repositories
 
             try
             {
-                var connection = await this._dbContext.GetConnection<Note>();
+                var connection = await this._dbContext.GetAsyncConnection<Note>();
 
                 int rowsAffected = await connection.UpdateAsync(note);
 
@@ -102,7 +102,7 @@ namespace NotesApp.Repositories
 
             try
             {
-                var connection = await this._dbContext.GetConnection<Note>();
+                var connection = await this._dbContext.GetAsyncConnection<Note>();
 
                 int rowsAffected = await connection.DeleteAsync(note);
 

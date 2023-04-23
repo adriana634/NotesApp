@@ -1,28 +1,30 @@
 ﻿using Microsoft.Extensions.Logging;
-using NotesApp.DatabaseContext;
 using SQLite;
 
 namespace NotesApp.Test
 {
     public class SQLiteFixture : IDisposable
     {
-        private readonly string _dbPath;
-        private readonly DbContext _dbContext;
+        private readonly List<string> _dbFilePaths;
         private readonly List<SQLiteAsyncConnection> _activeConnections;
-        private readonly ILogger _logger;
+        private readonly ILogger<SQLiteFixture> _logger;
 
         public SQLiteFixture()
         {
-            this._dbPath = Path.Combine(Path.GetTempPath(), $"notes_test_{Guid.NewGuid()}.db3");
-            this._dbContext = new DbContext(this._dbPath);
+            this._dbFilePaths = new List<string>();
             this._activeConnections = new List<SQLiteAsyncConnection>();
             this._logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<SQLiteFixture>();
         }
 
-        public async Task<SQLiteAsyncConnection> GetConnection<T>() where T : new()
+        public async Task<SQLiteAsyncConnection> GetAsyncConnection<T>() where T : new()
         {
-            var connection = await this._dbContext.GetConnection<T>();
+            var dbPath = Path.Combine(Path.GetTempPath(), $"notes_test_{Guid.NewGuid()}.db3");
+            this._dbFilePaths.Add(dbPath);
+
+            var connection = new SQLiteAsyncConnection(dbPath);
             this._activeConnections.Add(connection);
+
+            await connection.CreateTableAsync<T>();
 
             return connection;
         }
@@ -36,11 +38,16 @@ namespace NotesApp.Test
 
             this._activeConnections.Clear();
 
-            if (File.Exists(this._dbPath))
+            foreach (var dbPath in this._dbFilePaths)
             {
-                File.Delete(this._dbPath);
-                this._logger.LogInformation("Database file {dbPath} deleted.", this._dbPath);
+                if (File.Exists(dbPath))
+                {
+                    File.Delete(dbPath);
+                    this._logger.LogInformation("Database file {dbPath} deleted.", dbPath);
+                }
             }
+
+            this._dbFilePaths.Clear();
         }
     }
 }
