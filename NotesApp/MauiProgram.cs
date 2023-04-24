@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using NotesApp.DatabaseContext;
 using NotesApp.Repositories;
 using NotesApp.Services;
@@ -29,6 +30,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<INoteSelectionService, NoteSelectionService>();
         builder.Services.AddSingleton<IUpdateNoteViewModelFactory, UpdateNoteViewModelFactory>();
+
+        builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
 
         builder.Services.AddSingleton<AllNotesPage>();
         builder.Services.AddSingleton<NotesViewModel>();

@@ -9,7 +9,6 @@ using NotesApp.Services;
 using NotesApp.ViewModels.Interfaces;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace NotesApp.ViewModels
 {
@@ -18,49 +17,51 @@ namespace NotesApp.ViewModels
         private readonly INoteRepository _noteRepository;
         private readonly INavigationService _navigationService;
         private readonly INoteSelectionService _noteSelectionService;
-
+        private readonly IMessenger _messenger;
         private bool _isDataLoaded;
         private Dictionary<int, Note> _loadedNotes;
         
         public ObservableCollection<NoteViewModel> AllNotes { get; }
-        public ICommand NewCommand { get; }
-        public ICommand SelectNoteCommand { get; }
+        public AsyncRelayCommand NewNoteCommand { get; }
+        public AsyncRelayCommand<NoteViewModel> SelectNoteCommand { get; }
 
         public NotesViewModel(INoteRepository noteRepository,
                               INavigationService navigationService,
-                              INoteSelectionService noteSelectionService)
+                              INoteSelectionService noteSelectionService,
+                              IMessenger messenger)
         {
             this._noteRepository = noteRepository;
             this._navigationService = navigationService;
             this._noteSelectionService = noteSelectionService;
+            this._messenger = messenger;
 
             this._isDataLoaded = false;
             this._loadedNotes = new Dictionary<int, Note>();
 
             this.AllNotes = new ObservableCollection<NoteViewModel>();
-            this.NewCommand = new AsyncRelayCommand(this.NewNoteAsync);
+            this.NewNoteCommand = new AsyncRelayCommand(this.NewNoteAsync);
             this.SelectNoteCommand = new AsyncRelayCommand<NoteViewModel>(this.SelectNoteAsync, this.CanExecuteSelectNote);
         }
 
         public void OnAppearing()
         {
-            if (WeakReferenceMessenger.Default.IsRegistered<NoteCreatedMessage>(this) == false)
+            if (this._messenger.IsRegistered<NoteCreatedMessage, string>(this, MessengerTokens.Notes) == false)
             {
-                WeakReferenceMessenger.Default.Register<NoteCreatedMessage>(this, this.OnNoteCreated);
+                this._messenger.Register<NoteCreatedMessage, string>(this, MessengerTokens.Notes, this.OnNoteCreated);
             }
 
-            if (WeakReferenceMessenger.Default.IsRegistered<NoteUpdatedMessage>(this) == false)
+            if (this._messenger.IsRegistered<NoteUpdatedMessage, string>(this, MessengerTokens.Notes) == false)
             {
-                WeakReferenceMessenger.Default.Register<NoteUpdatedMessage>(this, this.OnNoteUpdated);
+                this._messenger.Register<NoteUpdatedMessage, string>(this, MessengerTokens.Notes, this.OnNoteUpdated);
             }
 
-            if (WeakReferenceMessenger.Default.IsRegistered<NoteDeletedMessage>(this) == false)
+            if (this._messenger.IsRegistered<NoteDeletedMessage, string>(this, MessengerTokens.Notes) == false)
             {
-                WeakReferenceMessenger.Default.Register<NoteDeletedMessage>(this, this.OnNoteDeleted);
+                this._messenger.Register<NoteDeletedMessage, string>(this, MessengerTokens.Notes, this.OnNoteDeleted);
             }
         }
 
-        public async Task<Result> LoadNotes()
+        public async Task<Result> LoadNotesAsync()
         {
             if (this._isDataLoaded == true)
                 return Result.Success();
@@ -90,7 +91,7 @@ namespace NotesApp.ViewModels
 
         private async Task NewNoteAsync()
         {
-            WeakReferenceMessenger.Default.Send(new NewNoteMessage());
+            this._messenger.Send(new NewNoteMessage(), MessengerTokens.Notes);
             await this._navigationService.NavigateToAsync(Routes.NewNotePage);
         }
 
@@ -169,9 +170,9 @@ namespace NotesApp.ViewModels
 
         public void Dispose()
         {
-            WeakReferenceMessenger.Default.Unregister<NoteCreatedMessage>(this);
-            WeakReferenceMessenger.Default.Unregister<NoteUpdatedMessage>(this);
-            WeakReferenceMessenger.Default.Unregister<NoteDeletedMessage>(this);
+            this._messenger.Unregister<NoteCreatedMessage, string>(this, MessengerTokens.Notes);
+            this._messenger.Unregister<NoteUpdatedMessage, string>(this, MessengerTokens.Notes);
+            this._messenger.Unregister<NoteDeletedMessage, string>(this, MessengerTokens.Notes);
         }
     }
 }

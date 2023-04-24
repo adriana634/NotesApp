@@ -5,7 +5,7 @@ using NotesApp.Models;
 using NotesApp.Repositories;
 using SQLite;
 
-namespace NotesApp.Test
+namespace NotesApp.Test.Persistence
 {
     public class NoteRepositoryFixture
     {

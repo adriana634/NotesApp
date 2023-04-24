@@ -18,7 +18,7 @@ public partial class AllNotesPage : ContentPage
 
         if (this.BindingContext is NotesViewModel notesViewModel)
         {
-            var loadNotesResult = await notesViewModel.LoadNotes();
+            var loadNotesResult = await notesViewModel.LoadNotesAsync();
 
             if (loadNotesResult.IsFailure)
             {

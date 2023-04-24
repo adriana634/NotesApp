@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using FluentAssertions;
 using NotesApp.Models;
 
-namespace NotesApp.Test
+namespace NotesApp.Test.Persistence
 {
     public class NoteRepositoryTest : IClassFixture<SQLiteFixture>, IClassFixture<NoteRepositoryFixture>
     {

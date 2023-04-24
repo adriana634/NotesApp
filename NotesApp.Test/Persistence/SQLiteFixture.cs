@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SQLite;
 
-namespace NotesApp.Test
+namespace NotesApp.Test.Persistence
 {
     public class SQLiteFixture : IDisposable
     {
