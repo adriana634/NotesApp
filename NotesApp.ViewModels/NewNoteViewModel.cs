@@ -6,7 +6,6 @@ using NotesApp.Messages;
 using NotesApp.Models;
 using NotesApp.Repositories;
 using NotesApp.Services;
-using System.Windows.Input;
 
 namespace NotesApp.ViewModels
 {
@@ -14,6 +13,7 @@ namespace NotesApp.ViewModels
     {
         private readonly INoteRepository _noteRepository;
         private readonly INavigationService _navigationService;
+        private readonly IMessenger _messenger;
 
         private readonly Note _note;
 
@@ -30,18 +30,20 @@ namespace NotesApp.ViewModels
             }
         }
 
-        public ICommand SaveCommand { get; private set; }
+        public AsyncRelayCommand SaveCommand { get; private set; }
 
-        public NewNoteViewModel(INoteRepository noteRepository, INavigationService navigationService)
+        public NewNoteViewModel(INoteRepository noteRepository, INavigationService navigationService, IMessenger messenger)
         {
-            this._note = new Note();
             this._noteRepository = noteRepository;
             this._navigationService = navigationService;
-            
-            this.SaveCommand = new AsyncRelayCommand(this.Save);
+            this._messenger = messenger;
+
+            this._note = new Note();
+
+            this.SaveCommand = new AsyncRelayCommand(this.SaveAsync);
         }
 
-        private async Task Save()
+        private async Task SaveAsync()
         {
             this._note.Date = DateTime.Now;
 
@@ -52,12 +54,12 @@ namespace NotesApp.ViewModels
                 var getNoteResult = await this._noteRepository.GetNoteByIdAsync(this._note.Id);
 
                 getNoteResult
-                    .Tap(newNote => WeakReferenceMessenger.Default.Send(new NoteCreatedMessage(newNote)))
-                    .TapError(() => WeakReferenceMessenger.Default.Send(new ErrorMessage("Error", "An error has ocurred while creating the note.")));
+                    .Tap(newNote => this._messenger.Send(new NoteCreatedMessage(newNote), MessengerTokens.Notes))
+                    .TapError(() => this._messenger.Send(new ErrorMessage("Error", "An error has ocurred while creating the note."), MessengerTokens.Errors));
             }
             else
             {
-                WeakReferenceMessenger.Default.Send(new ErrorMessage("Error", "An error has ocurred while creating the note."));
+                this._messenger.Send(new ErrorMessage("Error", "An error has ocurred while creating the note."), MessengerTokens.Errors);
             }
 
             await this._navigationService.PopAsync();
