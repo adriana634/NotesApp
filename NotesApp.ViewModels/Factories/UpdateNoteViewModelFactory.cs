@@ -1,4 +1,5 @@
-﻿using NotesApp.Models;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using NotesApp.Models;
 using NotesApp.Repositories;
 using NotesApp.Services;
 
@@ -16,19 +17,27 @@ namespace NotesApp.ViewModels
         public UpdateNoteViewModel Create(Note note)
         {
             var noteRepository = this._serviceProvider.GetService(typeof(INoteRepository)) as INoteRepository;
-            var navigationService = this._serviceProvider.GetService(typeof(INavigationService)) as INavigationService;
 
             if (noteRepository == null)
             {
                 throw new InvalidOperationException($"The {nameof(INoteRepository)} service could not be found");
             }
 
+            var navigationService = this._serviceProvider.GetService(typeof(INavigationService)) as INavigationService;
+
             if (navigationService == null)
             {
                 throw new InvalidOperationException($"The {nameof(INavigationService)} service could not be found");
             }
 
-            return new UpdateNoteViewModel(note, noteRepository, navigationService);
+            var messenger = this._serviceProvider.GetService(typeof(IMessenger)) as IMessenger;
+
+            if (messenger == null)
+            {
+                throw new InvalidOperationException($"The {nameof(IMessenger)} service could not be found");
+            }
+
+            return new UpdateNoteViewModel(note, noteRepository, navigationService, messenger);
         }
     }
 }

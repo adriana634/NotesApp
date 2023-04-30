@@ -7,7 +7,6 @@ using NotesApp.Models;
 using NotesApp.Repositories;
 using NotesApp.Services;
 using System.Diagnostics;
-using System.Windows.Input;
 
 namespace NotesApp.ViewModels
 {
@@ -15,6 +14,7 @@ namespace NotesApp.ViewModels
     {
         private readonly INoteRepository _noteRepository;
         private readonly INavigationService _navigationService;
+        private readonly IMessenger _messenger;
 
         private readonly Note _note;
 
@@ -31,16 +31,17 @@ namespace NotesApp.ViewModels
             }
         }
 
-        public ICommand SaveCommand { get; private set; }
-        public ICommand DeleteCommand { get; private set; }
+        public AsyncRelayCommand SaveCommand { get; private set; }
+        public AsyncRelayCommand DeleteCommand { get; private set; }
 
-        public UpdateNoteViewModel(Note note, INoteRepository noteRepository, INavigationService navigationService)
+        public UpdateNoteViewModel(Note note, INoteRepository noteRepository, INavigationService navigationService, IMessenger messenger)
         {
             Debug.Assert(note != null);
 
             this._note = note;
             this._noteRepository = noteRepository;
             this._navigationService = navigationService;
+            this._messenger = messenger;
 
             this.SaveCommand = new AsyncRelayCommand(this.Save);
             this.DeleteCommand = new AsyncRelayCommand(this.Delete);
@@ -57,12 +58,12 @@ namespace NotesApp.ViewModels
                 var getNoteResult = await this._noteRepository.GetNoteByIdAsync(this._note.Id);
 
                 getNoteResult
-                    .Tap(updatedNote => WeakReferenceMessenger.Default.Send(new NoteUpdatedMessage(updatedNote)))
-                    .TapError(() => WeakReferenceMessenger.Default.Send(new ErrorMessage("Error", "An error has ocurred while saving the note.")));
+                    .Tap(updatedNote => this._messenger.Send(new NoteUpdatedMessage(updatedNote), MessengerTokens.Notes))
+                    .TapError(() => this._messenger.Send(new ErrorMessage("Error", "An error has ocurred while saving the note."), MessengerTokens.Errors));
             }
             else
             {
-                WeakReferenceMessenger.Default.Send(new ErrorMessage("Error", "An error has ocurred while saving the note."));
+                this._messenger.Send(new ErrorMessage("Error", "An error has ocurred while saving the note."), MessengerTokens.Errors);
             }
 
             await this._navigationService.PopAsync();
@@ -73,8 +74,8 @@ namespace NotesApp.ViewModels
             var deleteNoteResult = await this._noteRepository.DeleteNoteAsync(this._note);
 
             deleteNoteResult
-                .Tap(() => WeakReferenceMessenger.Default.Send(new NoteDeletedMessage(this._note.Id)))
-                .TapError(() => WeakReferenceMessenger.Default.Send(new NoteDeletedMessage(this._note.Id)));
+                .Tap(() => this._messenger.Send(new NoteDeletedMessage(this._note.Id), MessengerTokens.Notes))
+                .TapError(() => this._messenger.Send(new ErrorMessage("Error", "An error has ocurred while deleting the note."), MessengerTokens.Errors));
 
             await this._navigationService.PopAsync();
         }
