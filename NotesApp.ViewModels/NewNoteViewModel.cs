@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CSharpFunctionalExtensions;
 using NotesApp.Messages;
@@ -9,7 +8,7 @@ using NotesApp.Services;
 
 namespace NotesApp.ViewModels
 {
-    public class NewNoteViewModel : ObservableObject
+    public class NewNoteViewModel
     {
         private readonly INoteRepository _noteRepository;
         private readonly INavigationService _navigationService;
